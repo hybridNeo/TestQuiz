@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -16,7 +18,7 @@ import org.json.JSONObject;
 
 import cz.msebera.android.httpclient.Header;
 
-public class QuizActivity extends AppCompatActivity {
+public class QuizActivity extends AppCompatActivity implements View.OnClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +62,10 @@ public class QuizActivity extends AppCompatActivity {
             try {
                 JSONObject question = questions.getJSONObject(0);
                 JSONArray options = question.getJSONArray("options");
+                aText = "A: "+options.getJSONObject(0).getString("A");
+                bText = "B: "+options.getJSONObject(1).getString("B");
+                cText = "C: "+options.getJSONObject(2).getString("C");
+                dText = "D: "+options.getJSONObject(3).getString("D");
                 quesText = question.getString("question");
                 answer = question.getString("answer");
                 Log.d("question",quesText);
@@ -69,6 +75,16 @@ public class QuizActivity extends AppCompatActivity {
                 TextView tv = (TextView)findViewById(R.id.tv);
                 tv.setText(quesText);
 
+                Button a = (Button)findViewById(R.id.A);
+                Button b = (Button)findViewById(R.id.B);
+                Button c = (Button)findViewById(R.id.C);
+                Button d = (Button)findViewById(R.id.D);
+                a.setText(aText);
+                b.setText(bText);
+                c.setText(cText);
+                d.setText(dText);
+
+
             }
 
         }
@@ -76,5 +92,10 @@ public class QuizActivity extends AppCompatActivity {
         @Override
     public void onBackPressed() {
         //        super.onBackPressed();
+    }
+
+    @Override
+    public void onClick(View v) {
+
     }
 }
