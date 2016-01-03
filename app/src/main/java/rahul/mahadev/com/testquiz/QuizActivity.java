@@ -17,9 +17,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import cz.msebera.android.httpclient.Header;
-
 public class QuizActivity extends AppCompatActivity implements View.OnClickListener {
-
+    int ques_no = 0;
+    String answer = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +54,7 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
 //        Log.d("HERE","here");
 
             String quesText = "";
-            String answer = "";
+
             String aText = "";
             String bText = "";
             String cText = "";
@@ -73,7 +73,7 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
                 e.printStackTrace();
             }finally {
                 TextView tv = (TextView)findViewById(R.id.tv);
-                tv.setText(quesText);
+                tv.setText("Question: "+quesText);
 
                 Button a = (Button)findViewById(R.id.A);
                 Button b = (Button)findViewById(R.id.B);
@@ -83,7 +83,10 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
                 b.setText(bText);
                 c.setText(cText);
                 d.setText(dText);
-
+                a.setOnClickListener(this);
+                b.setOnClickListener(this);
+                c.setOnClickListener(this);
+                d.setOnClickListener(this);
 
             }
 
@@ -96,6 +99,42 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+//        Log.d("here","hello there button here");
+        disableClick();
+        ques_no++;
+        String choice = "";
+        switch(v.getId()) {
+            case R.id.A:
+                choice = "A";
+                break;
+            case R.id.B:
+                choice = "B";
+                break;
+            case R.id.C:
+                choice = "C";
+                break;
+            case R.id.D:
+                choice = "D";
+                break;
+        }
+        if(answer.equals(choice)){
 
+            Log.d("DBG","correct "+ choice);
+        }else{
+            Log.d("DBG","incorrect" + answer + choice);
+        }
+
+
+
+    }
+    public void disableClick(){
+        Button a = (Button)findViewById(R.id.A);
+        Button b = (Button)findViewById(R.id.B);
+        Button c = (Button)findViewById(R.id.C);
+        Button d = (Button)findViewById(R.id.D);
+        a.setOnClickListener(null);
+        b.setOnClickListener(null);
+        c.setOnClickListener(null);
+        d.setOnClickListener(null);
     }
 }
