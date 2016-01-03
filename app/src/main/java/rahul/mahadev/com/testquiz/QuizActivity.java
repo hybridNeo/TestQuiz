@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import cz.msebera.android.httpclient.Header;
 public class QuizActivity extends AppCompatActivity implements View.OnClickListener {
@@ -62,7 +64,34 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
     public void startQuiz(int duration){
 //        Log.d("HERE","here");
         color = ((Button)findViewById(R.id.A)).getBackground();
+
+        new CountDownTimer(duration * 1000, 1000){
+            public void onTick(long millisUntilFinished){
+                //Do something in every tick
+
+                TextView tView = (TextView)findViewById(R.id.timer);
+
+                int total_secs = (int) (millisUntilFinished/1000);
+                int mins = total_secs/60;
+                int secs = total_secs % 60;
+                tView.setText("Time: " + mins + ":" + String.format("%02d", secs));
+                    //Put count down timer remaining time in a variable
+//                    timeRemaining = millisUntilFinished;
+
+            }
+            public void onFinish(){
+                //Do something when count down finished
+                Intent intent = new Intent(getApplicationContext(),ResultActivity.class);
+                intent.putExtra("score",score+"");
+                intent.putExtra("num",num_ques+"");
+                startActivity(intent);
+
+
+            }
+        }.start();
+
         nextQuestion();
+        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
 
     }
     public void nextQuestion(){
@@ -72,6 +101,8 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
         String bText = "";
         String cText = "";
         String dText = "";
+        TextView qNum = (TextView)findViewById(R.id.qNo);
+        qNum.setText("Question " + (1+ques_no) + ":");
         try {
             JSONObject question = questions.getJSONObject(ques_no);
             JSONArray options = question.getJSONArray("options");
@@ -86,7 +117,7 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
             e.printStackTrace();
         }finally {
             TextView tv = (TextView)findViewById(R.id.tv);
-            tv.setText("Question: "+quesText);
+            tv.setText(quesText);
 
             Button a = (Button)findViewById(R.id.A);
             Button b = (Button)findViewById(R.id.B);
@@ -147,10 +178,13 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
         Handler mHandler = new Handler();
         mHandler.postDelayed(new Runnable() {
             public void run() {
-                Toast.makeText(getApplicationContext(), "Delayed Toast!", Toast.LENGTH_SHORT).show();
                 if(ques_no < num_ques){
                     nextQuestion();
                 }else{
+                    Intent intent = new Intent(getApplicationContext(),ResultActivity.class);
+                    intent.putExtra("score",score+"");
+                    intent.putExtra("num",num_ques+"");
+                    startActivity(intent);
                     Log.d("TEST",ques_no+" quiz over "+num_ques);
                 }
             }

@@ -1,12 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    android:screenOrientation="portrait"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="rahul.mahadev.com.testquiz.ResultActivity">
 
-</RelativeLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:text="Score:"
+        android:textColor="@color/colorAccent"
+        android:gravity="center"
+        android:textSize="50sp"
+
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:orientation="horizontal"
+        >
+        <TextView
+            android:layout_width="260dp"
+            android:layout_height="fill_parent"
+            android:textSize="30sp"
+            android:gravity="center"
+            android:text="Answered correct:"
+            />
+        <TextView
+            android:id="@+id/numAnswered"
+            android:layout_width="90dp"
+            android:layout_height="fill_parent"
+            android:textSize="30sp"
+            android:gravity="center"
+            android:textColor="@color/colorPrimary"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="390dp"
+        android:orientation="horizontal"
+        >
+        <TextView
+            android:layout_width="220dp"
+            android:layout_height="fill_parent"
+            android:textSize="30sp"
+            android:text=" Score:"
+            />
+        <TextView
+            android:id="@+id/Score"
+            android:layout_width="130dp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="30sp"
+            android:layout_height="fill_parent" />
+    </LinearLayout>
+    <Button
+        android:id="@+id/main"
+        android:layout_width="fill_parent"
+        android:layout_height="80dp"
+        android:background="@color/colorAccent"
+        android:textSize="30sp"
+        android:text="Return to Main Menu"
+        />
+</LinearLayout>
