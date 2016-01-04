@@ -23,6 +23,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
 import cz.msebera.android.httpclient.Header;
 public class QuizActivity extends AppCompatActivity implements View.OnClickListener {
     int ques_no = 0;
@@ -38,12 +43,52 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
         Intent intent = getIntent();
         String link = intent.getStringExtra("link");
         Log.d("link", link);
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.get(link, null, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+        ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
+        Boolean internetPresent = cd.isConnectingToInternet();
+        if(internetPresent){
+            AsyncHttpClient client = new AsyncHttpClient();
+            client.get(link, null, new JsonHttpResponseHandler() {
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
 
-                // If the response is JSONObject instead of expected JSONArray
+                            // If the response is JSONObject instead of expected JSONArray
+                            int duration = 0;
+                            try {
+                                duration = Integer.parseInt(response.getString("duration"));
+                                questions = response.getJSONArray("questions");
+                                num_ques = questions.length();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                Log.e("JSON ERROR", "sector 2");
+                            } finally {
+                                startQuiz(duration);
+                            }
+
+                        }
+                    }
+
+            );
+        }else{
+            String[] arr = link.split("/");
+            final String temp = arr[arr.length -1];
+            System.out.println("File is " + temp);
+            JSONObject response = null;
+            try{
+                StringBuilder sb = new StringBuilder();
+                String line;
+                BufferedReader bufferedReader = new BufferedReader(new FileReader( new File(getApplicationContext().getFilesDir(), temp)));
+                while ((line = bufferedReader.readLine()) != null)
+                {
+                    sb.append(line);
+                }
+                String content = sb.toString();
+
+                response = new JSONObject(content);
+            }catch (IOException e){
+                e.printStackTrace();
+            }catch (JSONException e){
+                e.printStackTrace();
+            } finally {
                 int duration = 0;
                 try {
                     duration = Integer.parseInt(response.getString("duration"));
@@ -55,11 +100,9 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
                 } finally {
                     startQuiz(duration);
                 }
-
-                }
             }
+        }
 
-            );
         }
     public void startQuiz(int duration){
 //        Log.d("HERE","here");
@@ -106,10 +149,10 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
         try {
             JSONObject question = questions.getJSONObject(ques_no);
             JSONArray options = question.getJSONArray("options");
-            aText = "A: "+options.getJSONObject(0).getString("A");
-            bText = "B: "+options.getJSONObject(1).getString("B");
-            cText = "C: "+options.getJSONObject(2).getString("C");
-            dText = "D: "+options.getJSONObject(3).getString("D");
+            aText = " "+options.getJSONObject(0).getString("A");
+            bText = " "+options.getJSONObject(1).getString("B");
+            cText = " "+options.getJSONObject(2).getString("C");
+            dText = " "+options.getJSONObject(3).getString("D");
             quesText = question.getString("question");
             answer = question.getString("answer");
             Log.d("question",quesText);

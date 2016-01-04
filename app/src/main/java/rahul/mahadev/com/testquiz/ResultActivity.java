@@ -16,13 +16,13 @@ public class ResultActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
         Intent i = getIntent();
-        int num_ques = Integer.parseInt(i.getStringExtra("num"));
-        float score = Integer.parseInt(i.getStringExtra("score"));
+        float num_ques = Integer.parseInt(i.getStringExtra("num"));
+        int score = Integer.parseInt(i.getStringExtra("score"));
         TextView num_ans = (TextView) findViewById(R.id.numAnswered);
         TextView sc_view = (TextView)findViewById(R.id.Score);
         num_ans.setText(score + "");
         float percent = score/ num_ques * 100;
-        sc_view.setText( percent + "%");
+        sc_view.setText( (Math.round(percent * 100.0) / 100.0) + "%");
         Button portal = (Button)findViewById(R.id.main);
         portal.setOnClickListener(new View.OnClickListener() {
             @Override
