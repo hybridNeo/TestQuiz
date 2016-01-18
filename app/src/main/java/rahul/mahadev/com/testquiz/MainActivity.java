@@ -2,6 +2,7 @@ package rahul.mahadev.com.testquiz;
 
 import android.content.Context;
 import android.content.Intent;
+import android.security.KeyPairGeneratorSpec;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,6 +10,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
@@ -24,17 +26,84 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidParameterException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
+import java.util.Calendar;
+
+import javax.security.auth.x500.X500Principal;
 
 import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
+
+    public void test(){
+        Context ctx = getApplicationContext();
+        Calendar notBefore = Calendar.getInstance();
+        Calendar notAfter = Calendar.getInstance();
+        notAfter.add(Calendar.YEAR,1);
+        KeyPairGeneratorSpec spec = new KeyPairGeneratorSpec.Builder(ctx)
+                .setAlias("key1")
+                .setSubject(
+                        new X500Principal(String.format("CN=%s, OU=%s", "sample",
+                                ctx.getPackageName())))
+                .setSerialNumber(BigInteger.ONE).setStartDate(notBefore.getTime())
+                .setEndDate(notAfter.getTime()).build();
+
+        try{
+            KeyPairGenerator kpGenerator = KeyPairGenerator.getInstance("RSA", "AndroidKeyStore");
+            kpGenerator.initialize(spec);
+            KeyPair kp = kpGenerator.generateKeyPair();
+        }catch (NoSuchAlgorithmException e){
+            e.printStackTrace();
+        }catch(InvalidAlgorithmParameterException e){
+            e.printStackTrace();
+        }
+        catch(NoSuchProviderException e)
+        {
+            e.printStackTrace();
+        }
+        KeyStore keyStore = null;
+        try{
+            keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);
+            KeyStore.PrivateKeyEntry keyEntry = (KeyStore.PrivateKeyEntry)keyStore.getEntry("key1", null);
+            RSAPublicKey pubKey = (RSAPublicKey)keyEntry.getCertificate().getPublicKey();
+            RSAPrivateKey privKey = (RSAPrivateKey) keyEntry.getPrivateKey();
+            Toast.makeText(getApplicationContext(),privKey.toString(),Toast.LENGTH_LONG).show();
+        }catch (KeyStoreException e){
+            e.printStackTrace();
+        }catch(NoSuchAlgorithmException e){
+            e.printStackTrace();
+        }catch(CertificateException e){
+            e.printStackTrace();
+        }catch(UnrecoverableEntryException e){
+            e.printStackTrace();
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
+        //Call test function
+        test();
         Boolean internetPresent = cd.isConnectingToInternet();
         if(internetPresent){
             AsyncHttpClient client = new AsyncHttpClient();
