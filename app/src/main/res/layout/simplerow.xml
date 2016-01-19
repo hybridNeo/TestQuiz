@@ -1,9 +1,23 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="60dp" >
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/rowTextView"
     android:layout_width="fill_parent"
-    android:layout_height="60dp"
-    android:gravity="center"
+    android:layout_height="40dp"
+    android:gravity="left"
     android:paddingTop="10dp"
     android:textColor="@color/colorPrimary"
     android:textSize="18sp" >
-</TextView>  
+</TextView>
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/secondary"
+        android:layout_width="fill_parent"
+        android:layout_height="20dp"
+        android:paddingLeft="10dp"
+        android:gravity="left"
+        android:textColor="@color/colorAccent"
+        android:textSize="10sp" >
+    </TextView>
+</LinearLayout>

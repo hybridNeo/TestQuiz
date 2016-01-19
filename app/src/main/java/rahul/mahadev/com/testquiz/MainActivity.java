@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.security.KeyPairGeneratorSpec;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -41,6 +42,8 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Objects;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -102,16 +105,22 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
+        final HashMap maxVals = getMarks();
+        if(maxVals != null)
+            System.out.println("MAXVALS "+ maxVals.toString());
+
         //Call test function
-        test();
+        //test();
         Boolean internetPresent = cd.isConnectingToInternet();
         if(internetPresent){
             AsyncHttpClient client = new AsyncHttpClient();
             client.get("http://192.168.0.8/main.json",null, new JsonHttpResponseHandler(){
                 public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
-                    ArrayList<String> quiz_names = new ArrayList<String>();
+                    final ArrayList<String> quiz_names = new ArrayList<String>();
                     final ArrayList<String> urls = new ArrayList<String>();
-                    ArrayAdapter<String> listAdapter;
+                    CustomAdapter listAdapter;
+                    ArrayList<CustomObject> objects = new ArrayList<CustomObject>();
+
                     // Pull out the first event on the public timeline
                     try {
                         File file = new File(getApplicationContext().getFilesDir(), "main");
@@ -119,12 +128,19 @@ public class MainActivity extends AppCompatActivity {
                         fw.write(timeline.toString());
                         fw.close();
                         for (int i = 0; i < timeline.length(); ++i) {
-
-
                             JSONObject temp = timeline.getJSONObject(i);
                             String quiz_name = temp.getString("quiz_name");
                             String link = temp.getString("link");
                             System.out.println("QUIZ_NAME:" + quiz_name);
+                            String max = "";
+                            if(maxVals != null ){
+                                if(maxVals.containsKey(quiz_name)){
+
+                                    max = "Best Score = " + maxVals.get(quiz_name) + "%";
+
+                                }
+                            }
+                            objects.add(new CustomObject(quiz_name,max));
                             quiz_names.add(quiz_name);
                             urls.add(link);
                         }
@@ -137,7 +153,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                     finally {
                         ListView mainListView = (ListView) findViewById(R.id.mainListView);
-                        listAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.simplerow, quiz_names);
+
+                        listAdapter = new CustomAdapter(getApplicationContext(),objects );
 
                         mainListView.setAdapter(listAdapter);
                         mainListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -146,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
                                 //Log.d("Test", "position" + urls.get(position));
                                 String link = urls.get(position);
                                 Intent intent = new Intent(getApplicationContext(), QuizActivity.class);
+                                intent.putExtra("name",quiz_names.get(position));
                                 intent.putExtra("link", link);
                                 startActivity(intent);
 
@@ -185,9 +203,11 @@ public class MainActivity extends AppCompatActivity {
         }else{
             Log.d("TEST","INTERNET not there");
             File file = new File(getApplicationContext().getFilesDir(), "main");
-            ArrayList<String> quiz_names = new ArrayList<String>();
+            final ArrayList<String> quiz_names = new ArrayList<String>();
             final ArrayList<String> urls = new ArrayList<String>();
-            ArrayAdapter<String> listAdapter;
+            CustomAdapter listAdapter;
+            ArrayList<CustomObject> objects = new ArrayList<CustomObject>();
+
             try{
                 StringBuilder sb = new StringBuilder();
                 String line;
@@ -206,6 +226,15 @@ public class MainActivity extends AppCompatActivity {
                     String quiz_name = temp.getString("quiz_name");
                     String link = temp.getString("link");
                     System.out.println("QUIZ_NAME:" + quiz_name);
+                    String max = "";
+                    if(maxVals != null ){
+                        if(maxVals.containsKey(quiz_name)){
+
+                            max = "Best Score = " + maxVals.get(quiz_name) + "%";
+
+                        }
+                    }
+                    objects.add(new CustomObject(quiz_name,max));
                     quiz_names.add(quiz_name);
                     urls.add(link);
                 }
@@ -217,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
             }
             finally {
                 ListView mainListView = (ListView) findViewById(R.id.mainListView);
-                listAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.simplerow, quiz_names);
+                listAdapter = new CustomAdapter(getApplicationContext(),objects );
                 mainListView.setAdapter(listAdapter);
                 mainListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
@@ -226,6 +255,7 @@ public class MainActivity extends AppCompatActivity {
                         String link = urls.get(position);
                         Intent intent = new Intent(getApplicationContext(),QuizActivity.class);
                         intent.putExtra("link",link);
+                        intent.putExtra("name",quiz_names.get(position));
                         startActivity(intent);
 
                     }
@@ -237,4 +267,42 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+    private HashMap getMarks(){
+        try {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            File f = new File(getApplicationContext().getFilesDir(), "result");
+            if(f.exists()){
+                BufferedReader bufferedReader = new BufferedReader(new FileReader(f));
+                while ((line = bufferedReader.readLine()) != null) {
+                    sb.append(line);
+                }
+                String content = sb.toString();
+                String[] lines = content.split(";");
+                HashMap<String,Double> hm = new HashMap<String,Double>();
+                for(int i = 0;i < lines.length;++i){
+                    String[] resPair = lines[i].split(":");
+                    if(hm.containsKey(resPair[0])){
+                        double curScore = hm.get(resPair[0]);
+                        double newScore = Double.parseDouble(resPair[1]);
+                        if(newScore > curScore){
+                            hm.remove(resPair[0]);
+                            hm.put(resPair[0],newScore);
+                        }
+                    }else{
+                        hm.put(resPair[0],Double.parseDouble(resPair[1]));
+                    }
+                }
+                return hm;
+            }else{
+                System.out.println("File does not exist\n");
+
+            }
+
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

@@ -31,6 +31,7 @@ import java.io.IOException;
 import cz.msebera.android.httpclient.Header;
 public class QuizActivity extends AppCompatActivity implements View.OnClickListener {
     int ques_no = 0;
+    String quizName;
     int num_ques = 0;
     String answer = "";
     JSONArray questions = null;
@@ -42,7 +43,9 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_quiz);
         Intent intent = getIntent();
         String link = intent.getStringExtra("link");
-        Log.d("link", link);
+        quizName = intent.getStringExtra("name");
+        Log.d("qname","name is " + quizName);
+//        Log.d("link", link);
         ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
         Boolean internetPresent = cd.isConnectingToInternet();
         if(internetPresent){
@@ -127,6 +130,7 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
                 Intent intent = new Intent(getApplicationContext(),ResultActivity.class);
                 intent.putExtra("score",score+"");
                 intent.putExtra("num",num_ques+"");
+                intent.putExtra("name",quizName);
                 startActivity(intent);
 
 
@@ -155,7 +159,7 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
             dText = " "+options.getJSONObject(3).getString("D");
             quesText = question.getString("question");
             answer = question.getString("answer");
-            Log.d("question",quesText);
+
         }catch (JSONException e){
             e.printStackTrace();
         }finally {
@@ -212,9 +216,9 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
             correctAnswer.setBackgroundColor(correctAnswer.getContext().getResources().getColor(R.color.correctAnswer));
             score+=1;
 
-            Log.d("DBG","correct "+ choice);
+//            Log.d("DBG","correct "+ choice);
         }else {
-            Log.d("DBG", "incorrect" + answer + choice);
+//            Log.d("DBG", "incorrect" + answer + choice);
             Button wrongAnswer = (Button) findViewById(v.getId());
             wrongAnswer.setBackgroundColor(wrongAnswer.getContext().getResources().getColor(R.color.wrongAnswer));
         }
@@ -227,8 +231,9 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
                     Intent intent = new Intent(getApplicationContext(),ResultActivity.class);
                     intent.putExtra("score",score+"");
                     intent.putExtra("num",num_ques+"");
+                    intent.putExtra("name",quizName);
                     startActivity(intent);
-                    Log.d("TEST",ques_no+" quiz over "+num_ques);
+//                    Log.d("TEST",ques_no+" quiz over "+num_ques);
                 }
             }
         }, 1000);

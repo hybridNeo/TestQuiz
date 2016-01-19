@@ -9,8 +9,14 @@ import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
-public class ResultActivity extends AppCompatActivity {
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 
+public class ResultActivity extends AppCompatActivity {
+    double totalPercent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,9 +26,14 @@ public class ResultActivity extends AppCompatActivity {
         int score = Integer.parseInt(i.getStringExtra("score"));
         TextView num_ans = (TextView) findViewById(R.id.numAnswered);
         TextView sc_view = (TextView)findViewById(R.id.Score);
+        String qname = i.getStringExtra("name");
+        System.out.println("Quiz name is " + qname);
+
         num_ans.setText(score + "");
-        float percent = score/ num_ques * 100;
-        sc_view.setText( (Math.round(percent * 100.0) / 100.0) + "%");
+        double percent = score/ num_ques * 100;
+        double totalPercent = (Math.round(percent * 100.0) / 100.0);
+        writeResult(qname,totalPercent);
+        sc_view.setText( totalPercent + "%");
         Button portal = (Button)findViewById(R.id.main);
         portal.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -31,6 +42,17 @@ public class ResultActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+    private void writeResult(String qname, double totalPercent){
+        try{
+            File newfile = new File(getApplicationContext().getFilesDir(), "result");
+            FileWriter fw = new FileWriter(newfile,true);
+            fw.write(qname+":" + totalPercent + ";");
+            fw.close();
+        }catch (IOException e){
+
+        }
+
     }
     @Override
     public void onBackPressed() {
